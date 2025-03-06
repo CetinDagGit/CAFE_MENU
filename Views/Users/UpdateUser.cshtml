@@ -1,0 +1,30 @@
+﻿@model CAFE_MENU.Models.ViewModels.UserViewModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "UpdateUser";
+}
+
+
+<h2>Kullanıcı Güncelle</h2>
+
+<form asp-action="UpdateUser" method="post">
+    <input type="hidden" asp-for="UserId" />
+
+    <div>
+        <label>Ad</label>
+        <input asp-for="FirstName" required />
+    </div>
+    <div>
+        <label>Soyad</label>
+        <input asp-for="LastName" required />
+    </div>
+    <div>
+        <label>Kullanıcı Adı</label>
+        <input asp-for="UserName" required />
+    </div>
+    <div>
+        <label>Yeni Şifre (Değiştirmek istemiyorsanız boş bırakın)</label>
+        <input asp-for="Password" type="password" />
+    </div>
+    <button type="submit">Güncelle</button>
+</form>

@@ -1,0 +1,29 @@
+﻿@model CAFE_MENU.Models.Category
+
+@{
+    ViewData["Title"] = "Kategori Ekle";
+    Layout = "_AdminLayout";
+}
+
+<h2>Yeni Kategori Ekle</h2>
+
+<form asp-action="AddCategory" method="post">
+    <div class="mb-3">
+        <label for="CategoryName" class="form-label">Kategori Adı</label>
+        <input asp-for="CategoryName" class="form-control" required />
+    </div>
+
+    <div class="mb-3">
+        <label for="ParentCategoryId" class="form-label">Üst Kategori (Opsiyonel)</label>
+        <select asp-for="ParentCategoryId" class="form-select">
+            <option value="">Ana Kategori</option>
+            @foreach (var category in ViewBag.Categories)
+            {
+                <option value="@category.CategoryId">@category.CategoryName</option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-success">Ekle</button>
+    <a href="@Url.Action("Index", "Category")" class="btn btn-secondary">İptal</a>
+</form>
