@@ -1,4 +1,5 @@
-﻿@model List<CAFE_MENU.Models.Product>
+﻿@model List<CAFE_MENU.Models.DTOs.ProductDTO>
+
 @{
     ViewData["Title"] = "Ürünler";
     Layout = "_AdminLayout";
@@ -23,7 +24,7 @@
             <tr>
                 <td>@product.ProductId</td>
                 <td>@product.ProductName</td>
-                <td>@(product.Category?.CategoryName ?? "Bilinmiyor")</td>
+                <td>@product.CategoryName</td>
                 <td>@product.Price ₺</td>
                 <td>
                     @if (!string.IsNullOrEmpty(product.ImagePath))

@@ -5,39 +5,65 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using StackExchange.Redis;
+using Newtonsoft.Json;
+using CAFE_MENU.Models.DTOs;
 
 namespace CAFE_MENU.Controllers
 {
     public class ProductController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IDatabase _cache;
 
-        public ProductController(AppDbContext context)
+        public ProductController(AppDbContext context, IConnectionMultiplexer redis)
         {
             _context = context;
+            _cache = redis.GetDatabase();
         }
         public async Task<IActionResult> Index(int page = 1)
         {
-            int pageSize = 10; 
+            int pageSize = 10;
+            string cacheKey = $"products_page_{page}";
+
+            // Get data form redis
+            var cachedData = await _cache.StringGetAsync(cacheKey);
+            if (!cachedData.IsNullOrEmpty)
+            {
+                var products = JsonConvert.DeserializeObject<List<ProductDTO>>(cachedData);
+                ViewData["CurrentPage"] = page;
+                ViewData["TotalPages"] = (int)Math.Ceiling((double)await _context.Products.CountAsync() / pageSize);
+                return View(products);
+            }
+
             var query = _context.Products
-                                 .Include(p => p.Category)
-                                 .Where(p => p.IsDeleted == false || p.IsDeleted == null);
+                                .Include(p => p.Category)
+                                .Where(p => p.IsDeleted == false || p.IsDeleted == null)
+                                .Select(p => new ProductDTO
+                                {
+                                    ProductId = p.ProductId,
+                                    ProductName = p.ProductName,
+                                    CategoryName = p.Category.CategoryName,
+                                    Price = p.Price,
+                                    ImagePath = p.ImagePath
+                                });
 
             var totalItems = await query.CountAsync();
-
             var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
-            var products = await query
-                .Skip((page - 1) * pageSize)  
-                .Take(pageSize)  
+            var productsList = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
+
+            // Save to Redis (30 minutes)
+            await _cache.StringSetAsync(cacheKey, JsonConvert.SerializeObject(productsList), TimeSpan.FromMinutes(30));
 
             ViewData["CurrentPage"] = page;
             ViewData["TotalPages"] = totalPages;
 
-            return View(products);
+            return View(productsList);
         }
-
 
         [HttpGet]
         public IActionResult AddProduct()
@@ -54,11 +80,8 @@ namespace CAFE_MENU.Controllers
             if (imageFile != null && imageFile.Length > 0)
             {
                 string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "ProductImages");
-
                 if (!Directory.Exists(uploadPath))
-                {
                     Directory.CreateDirectory(uploadPath);
-                }
 
                 string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
                 string filePath = Path.Combine(uploadPath, uniqueFileName);
@@ -77,9 +100,19 @@ namespace CAFE_MENU.Controllers
             _context.Products.Add(model);
             await _context.SaveChangesAsync();
 
+            await ClearProductCache();
+
             return RedirectToAction("Index");
         }
 
+        private async Task ClearProductCache()
+        {
+            for (int i = 1; i <= 100; i++)
+            {
+                string cacheKey = $"products_page_{i}";
+                await _cache.KeyDeleteAsync(cacheKey);
+            }
+        }
 
         [HttpGet]
         public async Task<IActionResult> UpdateProduct(int id)
@@ -97,36 +130,29 @@ namespace CAFE_MENU.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateProduct(Product model, IFormFile imageFile)
         {
-
             var product = await _context.Products.FindAsync(model.ProductId);
             if (product == null)
             {
                 return NotFound();
             }
 
-            // Eğer kullanıcı yeni bir resim yüklediyse
             if (imageFile != null && imageFile.Length > 0)
             {
-                // Resmi kaydetme klasörü
                 string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "ProductImages");
 
-                // Eğer klasör yoksa oluştur
                 if (!Directory.Exists(uploadPath))
                 {
                     Directory.CreateDirectory(uploadPath);
                 }
 
-                // Benzersiz dosya adı oluştur
                 string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
                 string filePath = Path.Combine(uploadPath, uniqueFileName);
 
-                // Yeni resmi belirtilen klasöre kaydet
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await imageFile.CopyToAsync(stream);
                 }
 
-                // Eğer eski bir resim varsa, onu sil
                 if (!string.IsNullOrEmpty(product.ImagePath))
                 {
                     string oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", product.ImagePath.TrimStart('/'));
@@ -136,16 +162,18 @@ namespace CAFE_MENU.Controllers
                     }
                 }
 
-                // Yeni resim yolunu kaydet
                 product.ImagePath = "/ProductImages/" + uniqueFileName;
             }
 
-            // Diğer güncellenen alanları atama
             product.ProductName = model.ProductName;
             product.CategoryId = model.CategoryId;
             product.Price = model.Price;
 
             await _context.SaveChangesAsync();
+
+            // Önbelleği temizle
+            await ClearProductCache();
+
             return RedirectToAction("Index");
         }
 
