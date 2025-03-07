@@ -10,30 +10,35 @@ using System.Threading.Tasks;
 
 namespace CAFE_MENU.Controllers
 {
-    public class UsersController : Controller
+    public class UserController : Controller
     {
         private readonly AppDbContext _context;
-
-        public UsersController(AppDbContext context)
+        private const int PageSize = 10;
+        public UserController(AppDbContext context)
         {
             _context = context;
         }
-
-        // Kullanıcı Listesi
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
-            var users = await _context.Users.ToListAsync();
+            var totalUsers = await _context.Users.CountAsync();
+            var users = await _context.Users
+                .OrderBy(u => u.UserId)
+                .Skip((page - 1) * PageSize)
+                .Take(PageSize)
+                .ToListAsync();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalUsers / PageSize);
+
             return View(users);
         }
 
-        // Yeni Kullanıcı Ekleme Sayfasını Göster
         [HttpGet]
         public IActionResult AddUser()
         {
             return View();
         }
 
-        // Yeni Kullanıcı Ekleme İşlemi
         [HttpPost]
         public async Task<IActionResult> AddUser(UserViewModel model)
         {
@@ -48,7 +53,6 @@ namespace CAFE_MENU.Controllers
                 return View(model);
             }
 
-            // Salt oluştur
             var salt = GenerateSalt();
             var hashedPassword = HashPasswordWithSHA256(model.Password, salt);
 
@@ -67,7 +71,6 @@ namespace CAFE_MENU.Controllers
             return RedirectToAction("Index");
         }
 
-        // Kullanıcı Güncelleme Sayfasını Göster
         [HttpGet]
         public async Task<IActionResult> UpdateUser(int id)
         {
@@ -88,7 +91,6 @@ namespace CAFE_MENU.Controllers
             return View(userViewModel);
         }
 
-        // Kullanıcı Güncelleme İşlemi
         [HttpPost]
         public async Task<IActionResult> UpdateUser(UserViewModel model)
         {
@@ -107,7 +109,6 @@ namespace CAFE_MENU.Controllers
             user.LastName = model.LastName;
             user.UserName = model.UserName;
 
-            // Şifre değiştirildiyse, hashle ve kaydet
             if (!string.IsNullOrEmpty(model.Password))
             {
                 user.SaltPassword = GenerateSalt();
@@ -120,7 +121,6 @@ namespace CAFE_MENU.Controllers
             return RedirectToAction("Index");
         }
 
-        // Rastgele Salt Üretme Metodu
         private static byte[] GenerateSalt()
         {
             byte[] salt = new byte[16];
@@ -130,8 +130,6 @@ namespace CAFE_MENU.Controllers
             }
             return salt;
         }
-
-        // SHA256 + Salt ile şifre hashleme
         private static byte[] HashPasswordWithSHA256(string password, byte[] salt)
         {
             using (var sha256 = SHA256.Create())

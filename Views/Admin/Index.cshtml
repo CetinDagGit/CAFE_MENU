@@ -1,8 +1,86 @@
-﻿@{
+﻿@model CAFE_MENU.Models.ViewModels.DashboardViewModel
+@{
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Admin Paneli</h1>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Dashboard</h4>
+            </div>
+            <!-- Copilot: Add custom styles to control the size of the chart -->
+            <div class="card-body" style="width: 50%; margin: 0 auto;">
+
+                <div class="pie-chart-container" >
+                    <canvas id="pieChart"></canvas>
+                </div>
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(function () {
+            var ctx = document.getElementById('pieChart').getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: [
+                        // Copilot: Iterate over the CategoryCount dictionary and use the keys (category names) as labels
+        @foreach (var item in Model.CategoryCount)
+        {
+            <text>'@item.Key',</text>
+        }
+                            ],
+                    datasets: [{
+                        label: 'Number of Products by Category',
+                        data: [
+                            // Copilot: Iterate over the CategoryCount dictionary and use the values (product counts) as data
+        @foreach (var item in Model.CategoryCount)
+        {
+            <text>@item.Value,</text>
+        }
+                                ],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (tooltipItem) {
+                                    return tooltipItem.label + ': ' + tooltipItem.raw;  // Copilot: Custom tooltip formatting
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

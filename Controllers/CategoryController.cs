@@ -10,18 +10,28 @@ namespace CAFE_MENU.Controllers
     public class CategoryController : Controller
     {
         private readonly AppDbContext _context;
-
+        private const int PageSize = 10;
         public CategoryController(AppDbContext context)
         {
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
+            var totalCategories = await _context.Categories
+                .Where(c => c.IsDeleted == false || c.IsDeleted == null)
+                .CountAsync();
+
             var categories = await _context.Categories
-                .Include(c => c.ParentCategory) // Üst kategoriyi getir
-                .Where(c => c.IsDeleted == false || c.IsDeleted == null) // Silinmemişleri listele
+                .Include(c => c.ParentCategory)
+                .Where(c => c.IsDeleted == false || c.IsDeleted == null)
+                .OrderBy(c => c.CategoryId)
+                .Skip((page - 1) * PageSize)
+                .Take(PageSize)
                 .ToListAsync();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalCategories / PageSize);
 
             return View(categories);
         }

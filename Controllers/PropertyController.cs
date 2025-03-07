@@ -8,16 +8,24 @@ namespace CAFE_MENU.Controllers
     public class PropertyController : Controller
     {
         private readonly AppDbContext _context;
-
+        private const int PageSize = 10;
         public PropertyController(AppDbContext context)
         {
             _context = context;
         }
-
-        // 📌 Tüm özellikleri listeleme
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
-            var properties = await _context.Properties.ToListAsync();
+            var totalProperties = await _context.Properties.CountAsync();
+
+            var properties = await _context.Properties
+                .OrderBy(p => p.PropertyId)
+                .Skip((page - 1) * PageSize)
+                .Take(PageSize)
+                .ToListAsync();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalProperties / PageSize);
+
             return View(properties);
         }
 

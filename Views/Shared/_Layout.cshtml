@@ -26,6 +26,20 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>
+                    <ul class="navbar-nav">
+                        @if (Context.Session.GetString("UserName") != null)
+                        {
+                            <li class="nav-item">
+                                <span class="navbar-text me-3">Hoşgeldin, @Context.Session.GetString("UserName")</span>
+                            </li>
+                        }
+                        <li class="nav-item">
+                            <form asp-area="" asp-controller="Login" asp-action="Logout" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-danger">Çıkış Yap</button>
+                            </form>
+                        </li>
+                    </ul>
+
                 </div>
             </div>
         </nav>
@@ -38,7 +52,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2025 - CAFE_MENU - <a asp-area="" asp-controller="Ana Sayfa" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - CAFE_MENU
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

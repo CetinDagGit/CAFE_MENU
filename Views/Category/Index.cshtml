@@ -20,21 +20,46 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var category in Model)
+        @if (Model != null && Model.Count > 0)
+        {
+            int index = ((ViewBag.CurrentPage - 1) * 10) + 1;
+            @foreach (var category in Model)
+            {
+                <tr>
+                    <td>@index</td>
+                    <td>@category.CategoryName</td>
+                    <td>@(category.ParentCategory != null ? category.ParentCategory.CategoryName : "Ana Kategori")</td>
+                    <td>@category.CreatedDate?.ToString("dd/MM/yyyy")</td>
+                    <td>
+                        <a href="@Url.Action("UpdateCategory", "Category", new { id = category.CategoryId })" class="btn btn-warning btn-sm">Düzenle</a>
+                        <form asp-action="DeleteCategory" method="post" style="display:inline;">
+                            <input type="hidden" name="id" value="@category.CategoryId" />
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bu kategoriyi silmek istediğinize emin misiniz?')">Sil</button>
+                        </form>
+                    </td>
+                </tr>
+                index++;
+            }
+        }
+        else
         {
             <tr>
-                <td>@category.CategoryId</td>
-                <td>@category.CategoryName</td>
-                <td>@(category.ParentCategory != null ? category.ParentCategory.CategoryName : "Ana Kategori")</td>
-                <td>@category.CreatedDate?.ToString("dd/MM/yyyy")</td>
-                <td>
-                    <a href="@Url.Action("UpdateCategory", "Category", new { id = category.CategoryId })" class="btn btn-warning btn-sm">Düzenle</a>
-                    <form asp-action="DeleteCategory" method="post" style="display:inline;">
-                        <input type="hidden" name="id" value="@category.CategoryId" />
-                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bu kategoriyi silmek istediğinize emin misiniz?')">Sil</button>
-                    </form>
-                </td>
+                <td colspan="5" class="text-center">Henüz kategori eklenmemiş.</td>
             </tr>
         }
     </tbody>
 </table>
+
+@if (ViewBag.TotalPages > 1)
+{
+    <nav>
+        <ul class="pagination justify-content-center">
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}

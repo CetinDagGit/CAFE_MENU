@@ -20,7 +20,7 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index">Kullanıcılar</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Index">Kullanıcılar</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Ürünler</a>
@@ -32,6 +32,20 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Property" asp-action="Index">Ürün Özellikleri</a>
                         </li>
                     </ul>
+                    <ul class="navbar-nav">
+                        @if (Context.Session.GetString("UserName") != null)
+                        {
+                            <li class="nav-item">
+                                <span class="navbar-text me-3">Hoşgeldin, @Context.Session.GetString("UserName")</span>
+                            </li>
+                        }
+                        <li class="nav-item">
+                            <form asp-area="" asp-controller="Login" asp-action="Logout" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-danger">Çıkış Yap</button>
+                            </form>
+                        </li>
+                    </ul>
+
                 </div>
             </div>
         </nav>
@@ -44,7 +58,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2025 - CAFE_MENU - <a asp-area="" asp-controller="Ana Sayfa" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - CAFE_MENU
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
