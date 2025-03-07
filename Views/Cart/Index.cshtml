@@ -1,0 +1,40 @@
+﻿@model List<CAFE_MENU.Models.Product>
+
+<h2>Sepetiniz</h2>
+
+@if (Model.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Ürün Adı</th>
+                <th>Fiyat</th>
+                <th>Sil</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in Model)
+            {
+                <tr>
+                    <td>@product.ProductName</td>
+                    <td>@product.Price.ToString("C")</td>
+                    <td>
+                        <a href="@Url.Action("Remove", "Cart", new { id = product.ProductId })" class="btn btn-danger">Sil</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div>
+        <h4>Toplam Fiyat: @ViewBag.TotalPrice.ToString("C")</h4>
+        <form method="post" action="@Url.Action("Checkout", "Cart")">
+            <button type="submit" class="btn btn-success">Siparişi Ver</button>
+        </form>
+    </div>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Alışverişe Devam Et</a>
+}
+else
+{
+    <p>Sepetiniz boş.</p>
+}

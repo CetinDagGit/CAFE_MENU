@@ -24,7 +24,7 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<Property> Properties { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-
+    public DbSet<Order> Orders { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         try
@@ -110,6 +110,20 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.LastName).HasMaxLength(100);
             entity.Property(e => e.SaltPassword).HasMaxLength(256);
             entity.Property(e => e.UserName).HasMaxLength(100);
+        });
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.HasKey(e => e.OrderId).HasName("PK__Orders__C40E6B1EF62A115A");
+
+            entity.Property(e => e.OrderDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.Property(e => e.TotalPrice)
+                .HasColumnType("decimal(18, 2)") // TotalPrice için decimal türü
+                .IsRequired(); // Zorunlu olduğunu belirtiyoruz
+
+            // Diğer ilişkiler ve konfigürasyonlar
         });
 
         OnModelCreatingPartial(modelBuilder);

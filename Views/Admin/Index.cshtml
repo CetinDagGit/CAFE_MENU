@@ -5,18 +5,30 @@
 }
 
 <div class="row">
-    <div class="col-md-12">
+    <!-- Copilot: Card to display daily revenue -->
+    <div class="col-md-4">
         <div class="card">
             <div class="card-header">
-                <h4 class="card-title">Dashboard</h4>
+                <h5 class="card-title">Daily Total Revenue</h5>
+            </div>
+            <div class="card-body">
+                <!-- Copilot: Display the dynamic daily total revenue as currency -->
+                <h2 id="dailyRevenue">@Model.DailyTotalRevenue.ToString("C")</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Copilot: Card to display the pie chart -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Product Distribution by Category</h4>
             </div>
             <!-- Copilot: Add custom styles to control the size of the chart -->
-            <div class="card-body" style="width: 50%; margin: 0 auto;">
-
-                <div class="pie-chart-container" >
+            <div class="card-body" style="width: 100%; margin: 0 auto;">
+                <div class="pie-chart-container">
                     <canvas id="pieChart"></canvas>
                 </div>
-                <canvas id="pieChart"></canvas>
             </div>
         </div>
     </div>
@@ -26,26 +38,27 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         $(function () {
+            // Copilot: Initialize the pie chart for product distribution by category
             var ctx = document.getElementById('pieChart').getContext('2d');
             var myChart = new Chart(ctx, {
                 type: 'pie',
                 data: {
                     labels: [
                         // Copilot: Iterate over the CategoryCount dictionary and use the keys (category names) as labels
-        @foreach (var item in Model.CategoryCount)
-        {
-            <text>'@item.Key',</text>
-        }
-                            ],
+                        @foreach (var item in Model.CategoryCount)
+                        {
+                            <text>'@item.Key',</text>
+                        }
+                    ],
                     datasets: [{
                         label: 'Number of Products by Category',
                         data: [
                             // Copilot: Iterate over the CategoryCount dictionary and use the values (product counts) as data
-        @foreach (var item in Model.CategoryCount)
-        {
-            <text>@item.Value,</text>
-        }
-                                ],
+                            @foreach (var item in Model.CategoryCount)
+                            {
+                                <text>@item.Value,</text>
+                            }
+                        ],
                         backgroundColor: [
                             'rgba(255, 99, 132, 0.2)',
                             'rgba(54, 162, 235, 0.2)',
@@ -81,6 +94,14 @@
                     }
                 }
             });
+
+            // Copilot: Set an interval to update the daily revenue every 10 seconds
+            setInterval(function () {
+                $.get("/Admin/GetDailyTotalRevenue", function (data) {
+                    // Copilot: Update the daily total revenue on the page
+                    $('#dailyRevenue').text(data.dailyTotalRevenue.toLocaleString('en-US', { style: 'currency', currency: 'USD' }));
+                });
+            }, 10000);  // Copilot: This will refresh the daily total revenue every 10 seconds
         });
     </script>
 }
