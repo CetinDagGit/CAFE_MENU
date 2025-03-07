@@ -36,9 +36,9 @@
                     }
                 </td>
                 <td>
-                    <a href="@Url.Action("UpdateProduct", "Product", new { id = product.ProductId })" class="btn btn-warning">Düzenle</a>
+                    <a href="@Url.Action("UpdateProduct", "Product", new { id = product.ProductId.ToString() })" class="btn btn-warning">Düzenle</a>
                     <form asp-action="DeleteProduct" asp-controller="Product" method="post" style="display:inline;">
-                        <input type="hidden" name="id" value="@product.ProductId" />
+                        <input type="hidden" name="id" value="@product.ProductId.ToString()" />
                         <button type="submit" class="btn btn-danger" onclick="return confirm('Bu ürünü silmek istediğinize emin misiniz?');">Sil</button>
                     </form>
                 </td>
@@ -46,3 +46,23 @@
         }
     </tbody>
 </table>
+
+<div>
+    @if (ViewData["CurrentPage"] != null && ViewData["TotalPages"] != null)
+    {
+        var currentPage = (int)ViewData["CurrentPage"];
+        var totalPages = (int)ViewData["TotalPages"];
+
+
+        if (currentPage > 1)
+        {
+            <a href="@Url.Action("Index", "Product", new { page = currentPage - 1 })" class="btn btn-primary">Önceki</a>
+        }
+        if (currentPage < totalPages)
+        {
+            <a href="@Url.Action("Index", "Product", new { page = currentPage + 1 })" class="btn btn-primary">Sonraki</a>
+        }
+
+        <p>Sayfa @currentPage / @totalPages</p>
+    }
+</div>
