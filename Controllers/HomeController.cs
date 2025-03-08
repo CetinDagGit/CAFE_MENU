@@ -25,13 +25,29 @@ namespace CAFE_MENU.Controllers
             _httpClient = httpClient;  
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1, string searchTerm = "")
         {
-            string cacheKey = "home_products";
+            string cacheKey = $"home_products_page_{page}_search_{searchTerm}";
 
             // Get data via Redis
             var cachedData = await _cache.StringGetAsync(cacheKey);
             List<ProductDTO> productsList;
+
+            var query = _context.Products
+                                .Include(p => p.Category)
+                                .Where(p => (p.IsDeleted == false || p.IsDeleted == null) &&
+                                            (string.IsNullOrEmpty(searchTerm) || p.ProductName.Contains(searchTerm)))
+                                .Select(p => new ProductDTO
+                                {
+                                    ProductId = p.ProductId,
+                                    ProductName = p.ProductName,
+                                    CategoryName = p.Category.CategoryName,
+                                    Price = p.Price,
+                                    ImagePath = p.ImagePath
+                                });
+
+            var totalItems = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalItems / 10.0);
 
             if (!cachedData.IsNullOrEmpty)
             {
@@ -39,31 +55,27 @@ namespace CAFE_MENU.Controllers
             }
             else
             {
-                productsList = await _context.Products
-                    .Include(p => p.Category)
-                    .Where(p => p.IsDeleted == false || p.IsDeleted == null)
-                    .Select(p => new ProductDTO
-                    {
-                        ProductId = p.ProductId,
-                        ProductName = p.ProductName,
-                        CategoryName = p.Category.CategoryName,
-                        Price = p.Price,
-                        ImagePath = p.ImagePath
-                    })
-                    .ToListAsync();
+                productsList = await query.Skip((page - 1) * 10)  // Sayfa numarasýna göre ürünleri al
+                                          .Take(10)               // 10 ürün al
+                                          .ToListAsync();
 
-                // Save to Redis (30 minutes)
+                // Redis'e kaydet (30 dakika)
                 await _cache.StringSetAsync(cacheKey, Newtonsoft.Json.JsonConvert.SerializeObject(productsList), TimeSpan.FromMinutes(30));
             }
 
             // Get exchange rates
             var exchangeRates = await GetExchangeRates();
 
-            // Add USD rate to ViewBag
+            // Add USD rate and other data to ViewBag
             ViewBag.UsdRate = exchangeRates.ContainsKey("USD") ? exchangeRates["USD"] : 1;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.SearchTerm = searchTerm;
 
             return View(productsList);
         }
+
+
 
 
         [HttpPost]
