@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Products";
     Layout = "_AdminLayout";
+    decimal UsdRate = (decimal)ViewData["UsdRate"];
 }
 <h2>Products</h2>
 <a href="@Url.Action("AddProduct", "Product")" class="btn btn-success">Add New Product</a>
@@ -13,7 +14,7 @@
             <th>ID</th>
             <th>Product Name</th>
             <th>Category</th>
-            <th>Price</th>
+            <th>Price TRY / USD</th>
             <th>Image</th>
             <th>Transactions</th>
         </tr>
@@ -25,7 +26,8 @@
                 <td>@product.ProductId</td>
                 <td>@product.ProductName</td>
                 <td>@product.CategoryName</td>
-                <td>@product.Price ₺</td>
+                <td>@product.Price ₺ / @string.Format("{0:0.00}", product.Price / UsdRate) $</td>
+
                 <td>
                     @if (!string.IsNullOrEmpty(product.ImagePath))
                     {

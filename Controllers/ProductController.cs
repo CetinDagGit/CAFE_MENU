@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using StackExchange.Redis;
 using Newtonsoft.Json;
 using CAFE_MENU.Models.DTOs;
+using System.Net.Http;
+using System.Xml.Linq;
 
 namespace CAFE_MENU.Controllers
 {
@@ -26,13 +28,18 @@ namespace CAFE_MENU.Controllers
             int pageSize = 10;
             string cacheKey = $"products_page_{page}";
 
-            // Get data form redis
+            // Get data from Redis
             var cachedData = await _cache.StringGetAsync(cacheKey);
             if (!cachedData.IsNullOrEmpty)
             {
                 var products = JsonConvert.DeserializeObject<List<ProductDTO>>(cachedData);
                 ViewData["CurrentPage"] = page;
                 ViewData["TotalPages"] = (int)Math.Ceiling((double)await _context.Products.CountAsync() / pageSize);
+
+                // Get USD exchange rate
+                decimal UsdRate = await GetExchangeRateAsync("USD");
+                ViewData["UsdRate"] = UsdRate;
+
                 return View(products);
             }
 
@@ -62,8 +69,13 @@ namespace CAFE_MENU.Controllers
             ViewData["CurrentPage"] = page;
             ViewData["TotalPages"] = totalPages;
 
+            // Get USD exchange rate
+            decimal usdRate = await GetExchangeRateAsync("USD");
+            ViewData["UsdRate"] = usdRate;
+
             return View(productsList);
         }
+
 
         [HttpGet]
         public IActionResult AddProduct()
@@ -208,6 +220,28 @@ namespace CAFE_MENU.Controllers
             ViewBag.Categories = categories;
 
             return View();
+        }
+        public async Task<decimal> GetExchangeRateAsync(string currencyCode)
+        {
+            string url = "https://www.tcmb.gov.tr/kurlar/today.xml";
+            using (HttpClient client = new HttpClient())
+            {
+                var response = await client.GetStringAsync(url);
+                XDocument xmlDoc = XDocument.Parse(response);
+
+                var currency = xmlDoc.Descendants("Currency")
+                                     .FirstOrDefault(x => (string)x.Attribute("CurrencyCode") == currencyCode);
+
+                if (currency != null)
+                {
+                    decimal forexBuying = decimal.Parse(currency.Element("ForexBuying").Value.Replace('.', ','));
+                    return forexBuying;
+                }
+                else
+                {
+                    throw new Exception("Currency not found.");
+                }
+            }
         }
 
     }

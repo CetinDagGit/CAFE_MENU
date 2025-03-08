@@ -23,6 +23,7 @@ var redisConnectionString = builder.Configuration.GetValue<string>("Redis:Connec
 //Redis Service
 builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString));
 
+builder.Services.AddHttpClient();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

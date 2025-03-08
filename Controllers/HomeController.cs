@@ -8,17 +8,21 @@ using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using CAFE_MENU.Extensions;
+using System.Net.Http;
+using System.Xml.Linq;
+
 namespace CAFE_MENU.Controllers
 {
     public class HomeController : Controller
     {
         private readonly AppDbContext _context;
         private readonly IDatabase _cache;
-
-        public HomeController(AppDbContext context, IConnectionMultiplexer redis)
+        private readonly HttpClient _httpClient;
+        public HomeController(AppDbContext context, IConnectionMultiplexer redis, HttpClient httpClient)
         {
             _context = context;
             _cache = redis.GetDatabase();
+            _httpClient = httpClient;  
         }
 
         public async Task<IActionResult> Index()
@@ -27,30 +31,40 @@ namespace CAFE_MENU.Controllers
 
             // Get data via Redis
             var cachedData = await _cache.StringGetAsync(cacheKey);
+            List<ProductDTO> productsList;
+
             if (!cachedData.IsNullOrEmpty)
             {
-                var products = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ProductDTO>>(cachedData);
-                return View(products);
+                productsList = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ProductDTO>>(cachedData);
+            }
+            else
+            {
+                productsList = await _context.Products
+                    .Include(p => p.Category)
+                    .Where(p => p.IsDeleted == false || p.IsDeleted == null)
+                    .Select(p => new ProductDTO
+                    {
+                        ProductId = p.ProductId,
+                        ProductName = p.ProductName,
+                        CategoryName = p.Category.CategoryName,
+                        Price = p.Price,
+                        ImagePath = p.ImagePath
+                    })
+                    .ToListAsync();
+
+                // Save to Redis (30 minutes)
+                await _cache.StringSetAsync(cacheKey, Newtonsoft.Json.JsonConvert.SerializeObject(productsList), TimeSpan.FromMinutes(30));
             }
 
-            var productsList = await _context.Products
-                .Include(p => p.Category)
-                .Where(p => p.IsDeleted == false || p.IsDeleted == null)
-                .Select(p => new ProductDTO
-                {
-                    ProductId = p.ProductId,
-                    ProductName = p.ProductName,
-                    CategoryName = p.Category.CategoryName,
-                    Price = p.Price,
-                    ImagePath = p.ImagePath
-                })
-                .ToListAsync();
+            // Get exchange rates
+            var exchangeRates = await GetExchangeRates();
 
-            // Save to resdis (30 minutes)
-            await _cache.StringSetAsync(cacheKey, Newtonsoft.Json.JsonConvert.SerializeObject(productsList), TimeSpan.FromMinutes(30));
+            // Add USD rate to ViewBag
+            ViewBag.UsdRate = exchangeRates.ContainsKey("USD") ? exchangeRates["USD"] : 1;
 
             return View(productsList);
         }
+
 
         [HttpPost]
         public IActionResult AddToCart(int productId)
@@ -60,6 +74,35 @@ namespace CAFE_MENU.Controllers
             HttpContext.Session.SetObject("Cart", cart);
             return RedirectToAction("Index");
         }
+        private async Task<Dictionary<string, decimal>> GetExchangeRates()
+        {
+            string url = "https://www.tcmb.gov.tr/kurlar/today.xml";
+            Dictionary<string, decimal> exchangeRates = new Dictionary<string, decimal>();
 
+            try
+            {
+                var response = await _httpClient.GetStringAsync(url);
+                XDocument xml = XDocument.Parse(response);
+
+                var currencies = xml.Descendants("Currency")
+                                    .Where(x => x.Attribute("Kod") != null)
+                                    .Select(x => new
+                                    {
+                                        Code = x.Attribute("Kod").Value,
+                                        Rate = (decimal?)x.Element("ForexSelling") ?? 0
+                                    });
+
+                foreach (var currency in currencies)
+                {
+                    exchangeRates[currency.Code] = currency.Rate;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Döviz kuru alýnýrken hata oluþtu: " + ex.Message);
+            }
+
+            return exchangeRates;
+        }
     }
 }

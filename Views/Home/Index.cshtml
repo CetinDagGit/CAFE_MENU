@@ -2,6 +2,8 @@
 
 @{
     ViewData["Title"] = "Home";
+    var exchangeRates = ViewBag.ExchangeRates as Dictionary<string, decimal>;
+    decimal usdRate = ViewBag.UsdRate;
 }
 
 <h2>Home</h2>
@@ -15,7 +17,9 @@
                 <div class="card-body">
                     <h5 class="card-title">@product.ProductName</h5>
                     <p class="card-text">@product.CategoryName</p>
-                    <p class="card-text"><strong>@product.Price ₺</strong></p>
+                    <p class="card-text">
+                        <strong>@product.Price ₺ / @string.Format("{0:0.00}", product.Price / usdRate) $</strong>
+                    </p>
                     <form asp-action="AddToCart" asp-controller="Home" method="post">
                         <input type="hidden" name="productId" value="@product.ProductId" />
                         <button type="submit" class="btn btn-primary">Add to Cart</button>
