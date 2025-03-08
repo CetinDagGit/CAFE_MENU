@@ -35,7 +35,7 @@ namespace CAFE_MENU.Controllers
 
             if (user == null)
             {
-                ModelState.AddModelError("", "Geçersiz kullanıcı adı veya şifre.");
+                ModelState.AddModelError("", "Invalid username or password.");
                 return View(model);
             }
             var salt = user.SaltPassword;
@@ -47,7 +47,7 @@ namespace CAFE_MENU.Controllers
 
             if (!hashedPasswordFromUser.SequenceEqual(user.HashPassword))
             {
-                ModelState.AddModelError("", "Geçersiz kullanıcı adı veya şifre.");
+                ModelState.AddModelError("", "Invalid username or password.");
                 return View(model);
             }
 

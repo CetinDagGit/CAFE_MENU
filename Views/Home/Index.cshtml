@@ -1,10 +1,10 @@
 ﻿@model List<CAFE_MENU.Models.DTOs.ProductDTO>
 
 @{
-    ViewData["Title"] = "Ürünler";
+    ViewData["Title"] = "Home";
 }
 
-<h2>Ürünler</h2>
+<h2>Home</h2>
 
 <div class="row">
     @foreach (var product in Model)
@@ -18,7 +18,7 @@
                     <p class="card-text"><strong>@product.Price ₺</strong></p>
                     <form asp-action="AddToCart" asp-controller="Home" method="post">
                         <input type="hidden" name="productId" value="@product.ProductId" />
-                        <button type="submit" class="btn btn-primary">Sepete Ekle</button>
+                        <button type="submit" class="btn btn-primary">Add to Cart</button>
                     </form>
                 </div>
             </div>

@@ -5,26 +5,26 @@
 }
 
 
-<h2>Kullanıcı Güncelle</h2>
+<h2>Update User</h2>
 
 <form asp-action="UpdateUser" method="post">
     <input type="hidden" asp-for="UserId" />
 
     <div>
-        <label>Ad</label>
+        <label>Name</label>
         <input asp-for="FirstName" required />
     </div>
     <div>
-        <label>Soyad</label>
+        <label>Surname</label>
         <input asp-for="LastName" required />
     </div>
     <div>
-        <label>Kullanıcı Adı</label>
+        <label>Username</label>
         <input asp-for="UserName" required />
     </div>
     <div>
-        <label>Yeni Şifre (Değiştirmek istemiyorsanız boş bırakın)</label>
+        <label>New Password (Leave blank if you do not want to change)</label>
         <input asp-for="Password" type="password" />
     </div>
-    <button type="submit">Güncelle</button>
+    <button type="submit">Save</button>
 </form>

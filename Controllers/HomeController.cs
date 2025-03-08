@@ -25,7 +25,7 @@ namespace CAFE_MENU.Controllers
         {
             string cacheKey = "home_products";
 
-            // Redis'ten veri al
+            // Get data via Redis
             var cachedData = await _cache.StringGetAsync(cacheKey);
             if (!cachedData.IsNullOrEmpty)
             {
@@ -46,7 +46,7 @@ namespace CAFE_MENU.Controllers
                 })
                 .ToListAsync();
 
-            // Redis'e kaydet (30 dakika geçerli)
+            // Save to resdis (30 minutes)
             await _cache.StringSetAsync(cacheKey, Newtonsoft.Json.JsonConvert.SerializeObject(productsList), TimeSpan.FromMinutes(30));
 
             return View(productsList);

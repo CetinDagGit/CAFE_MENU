@@ -120,10 +120,8 @@ public partial class AppDbContext : DbContext
                 .HasColumnType("datetime");
 
             entity.Property(e => e.TotalPrice)
-                .HasColumnType("decimal(18, 2)") // TotalPrice için decimal türü
-                .IsRequired(); // Zorunlu olduğunu belirtiyoruz
-
-            // Diğer ilişkiler ve konfigürasyonlar
+                .HasColumnType("decimal(18, 2)") 
+                .IsRequired(); 
         });
 
         OnModelCreatingPartial(modelBuilder);

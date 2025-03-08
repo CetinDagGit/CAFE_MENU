@@ -1,24 +1,24 @@
 ﻿@model CAFE_MENU.Models.Category
 
 @{
-    ViewData["Title"] = "Kategori Güncelle";
+    ViewData["Title"] = "Update Category";
     Layout = "_AdminLayout";
 }
 
-<h2>Kategori Güncelle</h2>
+<h2>Update Category</h2>
 
 <form asp-action="UpdateCategory" method="post">
     <input type="hidden" asp-for="CategoryId" />
 
     <div class="mb-3">
-        <label for="CategoryName" class="form-label">Kategori Adı</label>
+        <label for="CategoryName" class="form-label">Category Name</label>
         <input asp-for="CategoryName" class="form-control" required />
     </div>
 
     <div class="mb-3">
-        <label for="ParentCategoryId" class="form-label">Üst Kategori (Opsiyonel)</label>
+        <label for="ParentCategoryId" class="form-label">ParentCategory (Optional)</label>
         <select asp-for="ParentCategoryId" class="form-select">
-            <option value="">Ana Kategori</option>
+            <option value="">Main Category</option>
             @foreach (var category in ViewBag.Categories)
             {
                 <option value="@category.CategoryId" selected="@(category.CategoryId == Model.ParentCategoryId ? "selected" : null)">
@@ -29,6 +29,6 @@
 
     </div>
 
-    <button type="submit" class="btn btn-primary">Güncelle</button>
-    <a href="@Url.Action("Index", "Category")" class="btn btn-secondary">İptal</a>
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="@Url.Action("Index", "Category")" class="btn btn-secondary">Cancel</a>
 </form>

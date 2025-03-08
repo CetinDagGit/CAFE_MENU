@@ -30,15 +30,12 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
                     </ul>
                     <ul class="navbar-nav">
                         @if (Context.Session.GetString("UserName") != null)
                         {
                             <li class="nav-item">
-                                <span class="navbar-text me-3">Hoşgeldin, @Context.Session.GetString("UserName")</span>
+                                <span class="navbar-text me-3">Welcome, @Context.Session.GetString("UserName")</span>
                             </li>
                         }
 
@@ -49,14 +46,14 @@
                                 int cartCount = cart.Count;
                             }
                             <a class="btn btn-warning me-3" asp-area="" asp-controller="Cart" asp-action="Index">
-                                🛒 Sepet (@cartCount)
+                                🛒 Cart (@cartCount)
                             </a>
 
                         </li>
 
                         <li class="nav-item">
                             <form asp-area="" asp-controller="Login" asp-action="Logout" method="post" class="d-inline">
-                                <button type="submit" class="btn btn-danger">Çıkış Yap</button>
+                                <button type="submit" class="btn btn-danger">Logout</button>
                             </form>
                         </li>
                     </ul>

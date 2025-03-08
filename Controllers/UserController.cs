@@ -49,7 +49,7 @@ namespace CAFE_MENU.Controllers
 
             if (string.IsNullOrWhiteSpace(model.Password))
             {
-                ModelState.AddModelError("Password", "Şifre boş olamaz.");
+                ModelState.AddModelError("Password", "Password cannot be empty.");
                 return View(model);
             }
 
@@ -138,6 +138,21 @@ namespace CAFE_MENU.Controllers
                 byte[] combinedBytes = passwordBytes.Concat(salt).ToArray();
                 return sha256.ComputeHash(combinedBytes);
             }
+        }
+        //Copilot: Create a new method to delete a user
+        [HttpGet]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
         }
     }
 }

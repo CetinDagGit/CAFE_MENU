@@ -1,21 +1,21 @@
 ﻿@model List<CAFE_MENU.Models.Property>
 
 @{
-    ViewData["Title"] = "Özellikler";
+    ViewData["Title"] = "Properties";
     Layout = "_AdminLayout";
 }
 
-<h2>Özellikler</h2>
+<h2>Properties</h2>
 
-<a href="@Url.Action("AddProperty", "Property")" class="btn btn-success mb-3">Yeni Özellik Ekle</a>
+<a href="@Url.Action("AddProperty", "Property")" class="btn btn-success mb-3">Add new property</a>
 
 <table class="table table-bordered">
     <thead>
         <tr>
             <th>#</th>
-            <th>Anahtar</th>
-            <th>Değer</th>
-            <th>İşlemler</th>
+            <th>Key</th>
+            <th>Value</th>
+            <th>Transactions</th>
         </tr>
     </thead>
     <tbody>
@@ -29,10 +29,10 @@
                     <td>@property.Key</td>
                     <td>@property.Value</td>
                     <td>
-                        <a href="@Url.Action("UpdateProperty", "Property", new { id = property.PropertyId })" class="btn btn-warning btn-sm">Düzenle</a>
+                        <a href="@Url.Action("UpdateProperty", "Property", new { id = property.PropertyId })" class="btn btn-warning btn-sm">Edit</a>
                         <form asp-action="DeleteProperty" asp-controller="Property" method="post" style="display:inline;">
                             <input type="hidden" name="id" value="@property.PropertyId" />
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bu özelliği silmek istediğinize emin misiniz?');">Sil</button>
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bu özelliği silmek istediğinize emin misiniz?');">Delete</button>
                         </form>
                     </td>
                 </tr>
@@ -42,7 +42,7 @@
         else
         {
             <tr>
-                <td colspan="4" class="text-center">Henüz özellik eklenmemiş.</td>
+                <td colspan="4" class="text-center">No features have been added yet.</td>
             </tr>
         }
     </tbody>

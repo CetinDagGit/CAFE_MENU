@@ -1,29 +1,29 @@
 ﻿@model CAFE_MENU.Models.Product
 @{
-    ViewData["Title"] = "Ürünü Güncelle";
+    ViewData["Title"] = "Update Product";
     Layout = "_AdminLayout";
 }
-<h2>Ürünü Güncelle</h2>
+<h2>Update Product</h2>
 
 <form asp-action="UpdateProduct" method="post">
     <input type="hidden" asp-for="ProductId" />
 
     <div class="form-group">
-        <label>Ürün Adı</label>
+        <label>Product Name</label>
         <input asp-for="ProductName" class="form-control" required />
     </div>
     <div class="form-group">
-        <label>Kategori ID</label>
+        <label>Category</label>
         <input asp-for="CategoryId" class="form-control" required />
     </div>
     <div class="form-group">
-        <label>Fiyat</label>
+        <label>Price</label>
         <input asp-for="Price" class="form-control" type="number" step="0.01" required />
     </div>
     <div class="form-group">
         <label>Resim URL</label>
         <input asp-for="ImagePath" class="form-control" />
     </div>
-    <button type="submit" class="btn btn-warning">Güncelle</button>
-    <a href="@Url.Action("Index", "Product")" class="btn btn-secondary">İptal</a>
+    <button type="submit" class="btn btn-warning">Update</button>
+    <a href="@Url.Action("Index", "Product")" class="btn btn-secondary">Cancel</a>
 </form>

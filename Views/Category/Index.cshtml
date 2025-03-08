@@ -1,22 +1,22 @@
 ﻿@model List<CAFE_MENU.Models.Category>
 
 @{
-    ViewData["Title"] = "Kategoriler";
+    ViewData["Title"] = "Categories";
     Layout = "_AdminLayout";
 }
 
-<h2>Kategori Listesi</h2>
+<h2>Category List</h2>
 
-<a href="@Url.Action("AddCategory", "Category")" class="btn btn-primary mb-3">Yeni Kategori Ekle</a>
+<a href="@Url.Action("AddCategory", "Category")" class="btn btn-primary mb-3">Add New Category</a>
 
 <table class="table table-bordered">
     <thead>
         <tr>
             <th>#</th>
-            <th>Kategori Adı</th>
-            <th>Üst Kategori</th>
-            <th>Oluşturulma Tarihi</th>
-            <th>İşlemler</th>
+            <th>Category Name</th>
+            <th>Parent Category</th>
+            <th>Creation Date</th>
+            <th>Transactions</th>
         </tr>
     </thead>
     <tbody>
@@ -31,10 +31,10 @@
                     <td>@(category.ParentCategory != null ? category.ParentCategory.CategoryName : "Ana Kategori")</td>
                     <td>@category.CreatedDate?.ToString("dd/MM/yyyy")</td>
                     <td>
-                        <a href="@Url.Action("UpdateCategory", "Category", new { id = category.CategoryId })" class="btn btn-warning btn-sm">Düzenle</a>
+                        <a href="@Url.Action("UpdateCategory", "Category", new { id = category.CategoryId })" class="btn btn-warning btn-sm">Edit</a>
                         <form asp-action="DeleteCategory" method="post" style="display:inline;">
                             <input type="hidden" name="id" value="@category.CategoryId" />
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bu kategoriyi silmek istediğinize emin misiniz?')">Sil</button>
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bu kategoriyi silmek istediğinize emin misiniz?')">Delete</button>
                         </form>
                     </td>
                 </tr>
@@ -44,7 +44,7 @@
         else
         {
             <tr>
-                <td colspan="5" class="text-center">Henüz kategori eklenmemiş.</td>
+                <td colspan="5" class="text-center">No categories have been added yet.</td>
             </tr>
         }
     </tbody>

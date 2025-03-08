@@ -1,21 +1,21 @@
 ﻿@model List<CAFE_MENU.Models.DTOs.ProductDTO>
 
 @{
-    ViewData["Title"] = "Ürünler";
+    ViewData["Title"] = "Products";
     Layout = "_AdminLayout";
 }
-<h2>Ürünler</h2>
-<a href="@Url.Action("AddProduct", "Product")" class="btn btn-success">Yeni Ürün Ekle</a>
+<h2>Products</h2>
+<a href="@Url.Action("AddProduct", "Product")" class="btn btn-success">Add New Product</a>
 
 <table class="table">
     <thead>
         <tr>
             <th>ID</th>
-            <th>Ürün Adı</th>
-            <th>Kategori</th>
-            <th>Fiyat</th>
-            <th>Resim</th>
-            <th>İşlemler</th>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Image</th>
+            <th>Transactions</th>
         </tr>
     </thead>
     <tbody>
@@ -29,18 +29,18 @@
                 <td>
                     @if (!string.IsNullOrEmpty(product.ImagePath))
                     {
-                        <img src="@product.ImagePath" alt="Ürün Resmi" width="50" height="50" />
+                        <img src="@product.ImagePath" alt="Product Image" width="50" height="50" />
                     }
                     else
                     {
-                        <span>Resim Yok</span>
+                        <span>No Image</span>
                     }
                 </td>
                 <td>
-                    <a href="@Url.Action("UpdateProduct", "Product", new { id = product.ProductId.ToString() })" class="btn btn-warning">Düzenle</a>
+                    <a href="@Url.Action("UpdateProduct", "Product", new { id = product.ProductId.ToString() })" class="btn btn-warning">Edit</a>
                     <form asp-action="DeleteProduct" asp-controller="Product" method="post" style="display:inline;">
                         <input type="hidden" name="id" value="@product.ProductId.ToString()" />
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Bu ürünü silmek istediğinize emin misiniz?');">Sil</button>
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Bu ürünü silmek istediğinize emin misiniz?');">Delete</button>
                     </form>
                 </td>
             </tr>
@@ -57,13 +57,13 @@
 
         if (currentPage > 1)
         {
-            <a href="@Url.Action("Index", "Product", new { page = currentPage - 1 })" class="btn btn-primary">Önceki</a>
+            <a href="@Url.Action("Index", "Product", new { page = currentPage - 1 })" class="btn btn-primary">Previous</a>
         }
         if (currentPage < totalPages)
         {
-            <a href="@Url.Action("Index", "Product", new { page = currentPage + 1 })" class="btn btn-primary">Sonraki</a>
+            <a href="@Url.Action("Index", "Product", new { page = currentPage + 1 })" class="btn btn-primary">Next</a>
         }
 
-        <p>Sayfa @currentPage / @totalPages</p>
+        <p>Page @currentPage / @totalPages</p>
     }
 </div>

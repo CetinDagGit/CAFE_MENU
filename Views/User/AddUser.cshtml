@@ -4,24 +4,24 @@
     ViewData["Title"] = "AddUser";
 }
 
-<h2>Yeni Kullanıcı Ekle</h2>
+<h2>Add New User</h2>
 
 <form asp-action="AddUser" method="post">
     <div>
-        <label>Ad</label>
+        <label>First Name</label>
         <input asp-for="FirstName" required />
     </div>
     <div>
-        <label>Soyad</label>
+        <label>Surname</label>
         <input asp-for="LastName" required />
     </div>
     <div>
-        <label>Kullanıcı Adı</label>
+        <label>User Name</label>
         <input asp-for="UserName" required />
     </div>
     <div>
-        <label>Şifre</label>
+        <label>Password</label>
         <input asp-for="Password" type="password" required />
     </div>
-    <button type="submit">Kaydet</button>
+    <button type="submit">Save</button>
 </form>

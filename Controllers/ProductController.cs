@@ -171,7 +171,6 @@ namespace CAFE_MENU.Controllers
 
             await _context.SaveChangesAsync();
 
-            // Önbelleği temizle
             await ClearProductCache();
 
             return RedirectToAction("Index");
@@ -189,7 +188,7 @@ namespace CAFE_MENU.Controllers
                 return NotFound();
             }
 
-            product.IsDeleted = true; // Veriyi silmek yerine işaretliyoruz
+            product.IsDeleted = true;
             await _context.SaveChangesAsync();
 
             return RedirectToAction("Index");
