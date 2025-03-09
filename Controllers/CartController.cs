@@ -17,8 +17,8 @@ public class CartController : Controller
     [HttpGet("Index")]
     public IActionResult Index()
     {
-        var cart = HttpContext.Session.GetObject<List<int>>("Cart") ?? new List<int>();  // Cart tipi int olarak kaldı
-        var products = _context.Products.Where(p => cart.Contains((int)p.ProductId)).ToList();  // ProductId'yi int'e dönüştürme
+        var cart = HttpContext.Session.GetObject<List<int>>("Cart") ?? new List<int>();  
+        var products = _context.Products.Where(p => cart.Contains((int)p.ProductId)).ToList(); 
         var totalPrice = products.Sum(p => p.Price);
 
         ViewBag.TotalPrice = totalPrice;  

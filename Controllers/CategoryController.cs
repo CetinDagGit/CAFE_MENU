@@ -73,7 +73,7 @@ namespace CAFE_MENU.Controllers
             }
 
             ViewBag.Categories = _context.Categories
-                .Where(c => c.IsDeleted == false || c.IsDeleted == null && c.CategoryId != id) // Kendisi hariç diğer kategoriler
+                .Where(c => c.IsDeleted == false || c.IsDeleted == null && c.CategoryId != id)
                 .ToList();
 
             return View(category);

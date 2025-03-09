@@ -32,7 +32,7 @@
                         <a href="@Url.Action("UpdateProperty", "Property", new { id = property.PropertyId })" class="btn btn-warning btn-sm">Edit</a>
                         <form asp-action="DeleteProperty" asp-controller="Property" method="post" style="display:inline;">
                             <input type="hidden" name="id" value="@property.PropertyId" />
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bu özelliği silmek istediğinize emin misiniz?');">Delete</button>
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this feature?');">Delete</button>
                         </form>
                     </td>
                 </tr>

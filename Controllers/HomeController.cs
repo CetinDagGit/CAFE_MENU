@@ -55,18 +55,17 @@ namespace CAFE_MENU.Controllers
             }
             else
             {
-                productsList = await query.Skip((page - 1) * 10)  // Sayfa numarasýna göre ürünleri al
-                                          .Take(10)               // 10 ürün al
+                productsList = await query.Skip((page - 1) * 10)
+                                          .Take(10)              
                                           .ToListAsync();
 
-                // Redis'e kaydet (30 dakika)
+                // Save to redis (30 minutes)
                 await _cache.StringSetAsync(cacheKey, Newtonsoft.Json.JsonConvert.SerializeObject(productsList), TimeSpan.FromMinutes(30));
             }
 
             // Get exchange rates
             var exchangeRates = await GetExchangeRates();
 
-            // Add USD rate and other data to ViewBag
             ViewBag.UsdRate = exchangeRates.ContainsKey("USD") ? exchangeRates["USD"] : 1;
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
