@@ -10,7 +10,12 @@
 
 <!-- Search box -->
 <form asp-action="Index" method="get" class="mb-4">
+
     <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" placeholder="Search by product name..." class="form-control" />
+    <select name="categoryId" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0"
+            asp-items="@(ViewBag.CategoryList)" required data-control="select2" data-placeholder="~Select~">
+        <option value="">Choose Category</option>
+    </select>
     <button type="submit" class="btn btn-primary mt-2">Search</button>
 </form>
 

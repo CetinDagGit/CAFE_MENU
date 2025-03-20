@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using CAFE_MENU.Extensions;
 using System.Net.Http;
 using System.Xml.Linq;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace CAFE_MENU.Controllers
 {
@@ -25,18 +26,22 @@ namespace CAFE_MENU.Controllers
             _httpClient = httpClient;  
         }
 
-        public async Task<IActionResult> Index(int page = 1, string searchTerm = "")
+        public async Task<IActionResult> Index(int page = 1, string searchTerm = "", int? categoryId = null)
         {
-            string cacheKey = $"home_products_page_{page}_search_{searchTerm}";
+            GetDrpDown(); // Kategori dropdown'unu doldur
 
-            // Get data via Redis
+            string cacheKey = $"home_products_page_{page}_search_{searchTerm}_category_{categoryId}";
+
+            // Redis'ten veriyi al
             var cachedData = await _cache.StringGetAsync(cacheKey);
             List<ProductDTO> productsList;
 
+            // Ürünleri filtrele
             var query = _context.Products
                                 .Include(p => p.Category)
                                 .Where(p => (p.IsDeleted == false || p.IsDeleted == null) &&
-                                            (string.IsNullOrEmpty(searchTerm) || p.ProductName.Contains(searchTerm)))
+                                            (string.IsNullOrEmpty(searchTerm) || p.ProductName.Contains(searchTerm)) &&
+                                            (!categoryId.HasValue || p.CategoryId == categoryId)) // Kategori filtresi eklendi
                                 .Select(p => new ProductDTO
                                 {
                                     ProductId = p.ProductId,
@@ -56,26 +61,24 @@ namespace CAFE_MENU.Controllers
             else
             {
                 productsList = await query.Skip((page - 1) * 10)
-                                          .Take(10)              
+                                          .Take(10)
                                           .ToListAsync();
 
-                // Save to redis (30 minutes)
+                // Redis'e kaydet (30 dakika)
                 await _cache.StringSetAsync(cacheKey, Newtonsoft.Json.JsonConvert.SerializeObject(productsList), TimeSpan.FromMinutes(30));
             }
 
-            // Get exchange rates
+            // Döviz kurlarýný al
             var exchangeRates = await GetExchangeRates();
 
             ViewBag.UsdRate = exchangeRates.ContainsKey("USD") ? exchangeRates["USD"] : 1;
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
             ViewBag.SearchTerm = searchTerm;
+            ViewBag.SelectedCategoryId = categoryId; // Seçili kategori bilgisini ViewBag'e ekle
 
             return View(productsList);
         }
-
-
-
 
         [HttpPost]
         public IActionResult AddToCart(int productId)
@@ -115,5 +118,22 @@ namespace CAFE_MENU.Controllers
 
             return exchangeRates;
         }
+
+        public IActionResult GetDrpDown()
+        {
+            var categories = _context.Categories
+                .Where(c => c.IsDeleted == false) // Silinmemiþ kategorileri al
+                .Select(c => new SelectListItem
+                {
+                    Text = c.CategoryName,
+                    Value = c.CategoryId.ToString()
+                })
+                .ToList();
+
+            ViewBag.CategoryList = categories;
+            return View();
+        }
+
+
     }
 }
